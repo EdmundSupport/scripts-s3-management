@@ -3,6 +3,32 @@
 
 install [nodejs](https://nodejs.org/en)
 
+## aws config
+
+crete file config
+```
+nano/vim/code ~/.aws/config 
+```
+
+define config
+```
+[default]
+region = 
+output = json
+```
+
+create file credentials
+```
+nano/vim/code ~/.aws/credentials
+```
+
+define credentials
+```
+[default]
+aws_access_key_id = 
+aws_secret_access_key = 
+```
+
 ## clone project
 
 ```
