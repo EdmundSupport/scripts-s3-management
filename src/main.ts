@@ -5,9 +5,9 @@ import * as path from 'path';
 dotenv.config();
 
 // Configura las credenciales de AWS y la región
-console.log('Conectando a S3');
+console.info('Conectando a S3');
 const s3 = new AWS.S3();
-console.log('S3 Conectado.');
+console.info('S3 Conectado.');
 
 // Función para listar buckets
 const listFolder = async (bucket: string, prefix: string = '/') => {
@@ -18,7 +18,7 @@ const listFolder = async (bucket: string, prefix: string = '/') => {
             Delimiter: '/',
         }
         const response = await s3.listObjectsV2(params).promise();
-        console.log('Folders:', response.$response.data);
+        console.info('Folders:', response.$response.data);
     } catch (error) {
         console.error('Error al listar folders:', error);
     }
@@ -32,7 +32,7 @@ const listFiles = async (bucket: string, prefix: string = '/') => {
             Prefix: `${prefix}`,
         }
         const response = await s3.listObjectsV2(params).promise();
-        console.log('Archivos:', response.$response.data);
+        console.info('Archivos:', response.$response.data);
     } catch (error) {
         console.error('Error al listar archivos:', error);
     }
@@ -46,7 +46,7 @@ const download = async (bucket: string, prefix: string) => {
             Key: `${prefix}`,
         }
         const response = await s3.getObject(params).promise();
-        console.log('Archivos:', response.$response.data);
+        console.info('Archivos:', response.$response.data);
     } catch (error) {
         console.error('Error al listar archivos:', error);
     }
@@ -56,7 +56,7 @@ const download = async (bucket: string, prefix: string) => {
 const listBuckets = async () => {
     try {
         const response = await s3.listBuckets().promise();
-        console.log('Buckets:', response.$response.data);
+        console.info('Buckets:', response.$response.data);
     } catch (error) {
         console.error('Error al listar buckets:', error);
     }
@@ -69,12 +69,12 @@ const createBucket = async (bucketName: string) => {
         const bucketExists = existingBuckets.Buckets?.some((bucket) => bucket.Name === bucketName);
 
         if (bucketExists) {
-            console.log(`El bucket "${bucketName}" ya existe.`);
+            console.info(`El bucket "${bucketName}" ya existe.`);
             return;
         }
 
         await s3.createBucket({ Bucket: bucketName }).promise();
-        console.log(`Bucket "${bucketName}" creado exitosamente.`);
+        console.info(`Bucket "${bucketName}" creado exitosamente.`);
     } catch (error) {
         console.error('Error al crear el bucket:', error);
     }
@@ -103,7 +103,7 @@ const createFolder = async (bucketName: string, prefix: string) => {
         };
 
         await s3.putObject(params).promise();
-        console.log(`Carpeta "${bucketName}/${base}" creado exitosamente.`);
+        console.info(`Carpeta "${bucketName}/${base}" creado exitosamente.`);
     } catch (error) {
         console.error('Error al crear la carpeta:', error);
     }
@@ -115,7 +115,7 @@ const copyFile = async (sourceBucket: string, sourceKey: string, destBucket: str
         // Verificar si el archivo ya existe en el destino
         try {
             await s3.headObject({ Bucket: destBucket, Key: destKey }).promise();
-            console.log(`El archivo "${destKey}" ya existe en el bucket "${destBucket}".`);
+            console.info(`El archivo "${destKey}" ya existe en el bucket "${destBucket}".`);
             return;
         } catch (error: any) {
             if (error.code !== 'NotFound') throw error;
@@ -127,7 +127,7 @@ const copyFile = async (sourceBucket: string, sourceKey: string, destBucket: str
             Key: destKey,
         }).promise();
 
-        console.log(`Archivo "${sourceKey}" copiado exitosamente a "${destBucket}/${destKey}".`);
+        console.info(`Archivo "${sourceKey}" copiado exitosamente a "${destBucket}/${destKey}".`);
     } catch (error) {
         console.error('Error al copiar el archivo:', error);
     }
@@ -142,7 +142,7 @@ const copyFolder = async (sourceBucket: string, sourceFolder: string, destBucket
         }).promise();
 
         if (!objects.Contents || objects.Contents.length === 0) {
-            console.log(`No se encontraron objetos en la carpeta "${sourceFolder}".`);
+            console.info(`No se encontraron objetos en la carpeta "${sourceFolder}".`);
             return;
         }
 
@@ -155,7 +155,7 @@ const copyFolder = async (sourceBucket: string, sourceFolder: string, destBucket
             // Verificar si el archivo ya existe en el destino
             try {
                 await s3.headObject({ Bucket: destBucket, Key: destKey }).promise();
-                console.log(`El archivo "${destKey}" ya existe en el bucket "${destBucket}".`);
+                console.info(`El archivo "${destKey}" ya existe en el bucket "${destBucket}".`);
                 continue;
             } catch (error: any) {
                 if (error.code !== 'NotFound') throw error;
@@ -167,7 +167,7 @@ const copyFolder = async (sourceBucket: string, sourceFolder: string, destBucket
                 Key: destKey,
             }).promise();
 
-            console.log(`Archivo "${obj.Key}" copiado exitosamente a "${destBucket}/${destKey}".`);
+            console.info(`Archivo "${obj.Key}" copiado exitosamente a "${destBucket}/${destKey}".`);
         }
     } catch (error) {
         console.error('Error al copiar la carpeta:', error);
@@ -239,7 +239,7 @@ const captureParams = () => {
 
     switch (action) {
         case 'list': {
-            console.log('Listando buckets...');
+            console.info('Listando buckets...');
             listBuckets();
             break;
         }
@@ -267,7 +267,7 @@ const captureParams = () => {
             }
             const bucketName = args[0];
             const prefixName = args[1] ?? '';
-            console.log('Listando files...');
+            console.info('Listando files...');
             listFiles(bucketName, prefixName);
             break;
         }
@@ -281,7 +281,7 @@ const captureParams = () => {
             }
             const bucketName = args[0];
             const prefixName = args[1] ?? '';
-            console.log('Descandaro files...');
+            console.info('Descandaro files...');
             download(bucketName, prefixName);
             break;
         }
@@ -307,7 +307,7 @@ const captureParams = () => {
             }
             const bucketName = args[0];
             const prefix = args[1];
-            console.log(`Creando bucket "${bucketName}/${prefix}"...`);
+            console.info(`Creando bucket "${bucketName}/${prefix}"...`);
             createFolder(bucketName, prefix);
             break;
         }
@@ -319,7 +319,7 @@ const captureParams = () => {
                 return;
             }
             const [sourceBucket, sourceKey, destBucket, destKey] = args;
-            console.log(`Copiando archivo de "${sourceBucket}/${sourceKey}" a "${destBucket}/${destKey}"...`);
+            console.info(`Copiando archivo de "${sourceBucket}/${sourceKey}" a "${destBucket}/${destKey}"...`);
             copyFile(sourceBucket, sourceKey, destBucket, destKey);
             break;
         }
@@ -331,7 +331,7 @@ const captureParams = () => {
                 return;
             }
             const [sourceBucketFolder, sourceFolder, destBucketFolder, destFolder] = args;
-            console.log(`Copiando carpeta de "${sourceBucketFolder}/${sourceFolder}" a "${destBucketFolder}/${destFolder}"...`);
+            console.info(`Copiando carpeta de "${sourceBucketFolder}/${sourceFolder}" a "${destBucketFolder}/${destFolder}"...`);
             copyFolder(sourceBucketFolder, sourceFolder, destBucketFolder, destFolder);
             break;
         }
@@ -346,7 +346,7 @@ const captureParams = () => {
             uploadFile(bucketName, originUrl, prefix);
         }
         default: {
-            console.log('Acción no reconocida. Usa "list", "list-folder", "create", "copy-file" o "copy-folder", "upload-file".');
+            console.info('Acción no reconocida. Usa "list", "list-folder", "create", "copy-file" o "copy-folder", "upload-file".');
             break;
         }
     }
